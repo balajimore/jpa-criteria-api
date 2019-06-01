@@ -30,3 +30,10 @@ VALUES ('J. K. Rowling'),
 
 INSERT INTO BOOK_AUTHOR (BOOKS_ID, AUTHORS_ID)
 VALUES (1,1), (2,2), (3,3), (3,4), (4,5);
+
+
+INSERT INTO Announcement (a_id,title,dividend,createdOn) VALUES (1, 'CashDividend', 7,'2019-06-01T00:00:30+0');
+INSERT INTO Announcement (a_id,title,dividend,createdOn) VALUES (2, 'CashDividend', 8,'2019-05-05T00:00:30+0');
+
+INSERT INTO Entitlement (e_id,amount,announcementId) VALUES (22,14,1);
+INSERT INTO Entitlement (e_id,amount,announcementId) VALUES (33,16,1);

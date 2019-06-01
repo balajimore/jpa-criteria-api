@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * Created by mtumilowicz on 2018-05-08.
+ * Updated by balajimore on 2019-06-01.
  */
 class TestsWithFullTypeSafe {
 
@@ -51,9 +51,29 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Book> cc_query = cb.createQuery(Book.class);
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cc_query_root)
-                .orderBy(cb.asc(cc_query_root.get(Book_.title)));
+                .orderBy(cb.asc(cc_query_root.get("title")));
+
+        assertThat(entityManager.createQuery(cc_query).getResultList())
+                .isEqualTo(jpql_query.getResultList());
+    }
+
+    @Test
+    void getAllAnnouncementsOrderByTitle() {
+        TypedQuery<Announcement> jpql_query =
+                entityManager.createQuery("" +
+                                "SELECT a " +
+                                "FROM Announcement a " +
+                                "ORDER BY a.a_id",
+                        Announcement.class);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Announcement> cc_query = cb.createQuery(Announcement.class);
+        Root<Announcement> cc_query_root = cc_query.from(Announcement.class);
+
+        cc_query.select(cc_query_root)
+                .orderBy(cb.asc(cc_query_root.get("a_id")));
 
         assertThat(entityManager.createQuery(cc_query).getResultList())
                 .isEqualTo(jpql_query.getResultList());
@@ -62,7 +82,7 @@ class TestsWithFullTypeSafe {
     @Test
     void getBooksByTitleLike() {
         String titleLike = "Lord%";
-        
+
         TypedQuery<Book> jpql_query = entityManager.createQuery("" +
                         "SELECT b " +
                         "FROM Book b " +
@@ -74,7 +94,7 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Book> cc_query = cb.createQuery(Book.class);
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cc_query_root)
                 .where(cb.like(cc_query_root.get(Book_.title), titleLike));
 
@@ -137,7 +157,7 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Book> cc_query = cb.createQuery(Book.class);
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cc_query_root)
                 .where(cc_query_root.get(Book_.price).in(prices));
 
@@ -164,7 +184,7 @@ class TestsWithFullTypeSafe {
     @Test
     void getBooksWithPriceMoreThan() {
         int value = 10;
-        
+
         TypedQuery<Book> jpql_query = entityManager.createQuery("" +
                         "SELECT b " +
                         "FROM Book b " +
@@ -175,13 +195,13 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Book> cc_query = cb.createQuery(Book.class);
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cc_query_root)
                 .where(cb.gt(cc_query_root.get(Book_.price), cb.parameter(Integer.class, "value")));
 
         assertThat(entityManager.createQuery(cc_query)
-                        .setParameter("value", value)
-                        .getResultList())
+                .setParameter("value", value)
+                .getResultList())
                 .containsExactlyInAnyOrderElementsOf(jpql_query.getResultList());
     }
 
@@ -196,7 +216,7 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Book> cc_query = cb.createQuery(Book.class);
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cc_query_root)
                 .where(cb.gt(cb.size(cc_query_root.get(Book_.authors)), 1));
 
@@ -217,10 +237,10 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> cc_query = cb.createTupleQuery();
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cb.tuple(
-                            cc_query_root.get(Book_.genre).alias("genre"),
-                            cb.count(cc_query_root).alias("count")))
+                cc_query_root.get(Book_.genre).alias("genre"),
+                cb.count(cc_query_root).alias("count")))
                 .groupBy(cc_query_root.get(Book_.genre));
 
         List<CountBooksByGenreTupleWrapper> jpql_query_results = jpql_query.getResultList()
@@ -248,7 +268,7 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<WritingGenre> cc_query = cb.createQuery(WritingGenre.class);
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cc_query_root.get(Book_.genre))
                 .groupBy(cc_query_root.get(Book_.genre))
                 .having(cb.gt(cb.count(cc_query_root.get(Book_.genre)), 1));
@@ -260,7 +280,7 @@ class TestsWithFullTypeSafe {
     @Test
     void getBooksByTitle() {
         String title = "Harry Potter";
-        
+
         TypedQuery<Book> jpql_query =
                 entityManager.createQuery("" +
                                 "SELECT b " +
@@ -272,13 +292,13 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Book> cc_query = cb.createQuery(Book.class);
         Root<Book> cc_query_root = cc_query.from(Book.class);
-        
+
         cc_query.select(cc_query_root)
                 .where(cb.equal(cc_query_root.get(Book_.title), cb.parameter(String.class, "title")));
 
         assertThat(entityManager.createQuery(cc_query)
-                        .setParameter("title", title)
-                        .getResultList())
+                .setParameter("title", title)
+                .getResultList())
                 .containsExactlyInAnyOrderElementsOf(jpql_query.getResultList());
     }
 
@@ -337,6 +357,68 @@ class TestsWithFullTypeSafe {
     }
 
     @Test
+    void findEntitlementForAnnouncement() {
+        TypedQuery<Announcement> jpql_query =
+                entityManager.createQuery("" +
+                                "SELECT a " +
+                                "FROM Announcement a " +
+                                "WHERE 0 = (SELECT COUNT(e.e_id) FROM Entitlement e where e.announcementId = a.a_id)",
+                        Announcement.class);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Announcement> cc_query = cb.createQuery(Announcement.class);
+        Root<Announcement> cc_a_root = cc_query.from(Announcement.class);
+
+        Subquery<Long> cc_cnt_sq = cc_query.subquery(Long.class);
+        Root<Entitlement> cc_cnt_sq_root = cc_cnt_sq.from(Entitlement.class);
+        cc_cnt_sq.select(cb.count(cc_cnt_sq_root.get("e_id")))
+                .where(cb.equal(cc_cnt_sq_root.get("announcementId"), cc_a_root.get("a_id")));
+
+
+        cc_query.select(cc_a_root).where(cb.equal(cc_cnt_sq, 0));
+
+        System.out.println("RESULT ===>" + entityManager.createQuery(cc_query).getResultList());
+        System.out.println("RESULT2--->" + jpql_query.getResultList());
+
+        assertThat(entityManager.createQuery(cc_query).getResultList())
+                .isEqualTo(jpql_query.getResultList());
+    }
+
+    @Test
+    void findEntitlementForAnnouncementByDate() {
+        TypedQuery<Announcement> jpql_query =
+                entityManager.createQuery("" +
+                                "SELECT a " +
+                                "FROM Announcement a " +
+                                "WHERE " +
+                                " (YEAR(a.createdOn)=2019) AND (MONTH(a.createdOn)=5) AND (DAY(a.createdOn)=6) AND " +
+                                "0 = (SELECT COUNT(e.e_id) FROM Entitlement e where e.announcementId = a.a_id)",
+                        Announcement.class);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Announcement> cc_query = cb.createQuery(Announcement.class);
+        Root<Announcement> cc_a_root = cc_query.from(Announcement.class);
+
+        Expression<Integer> year = cb.function("year", Integer.class, cc_a_root.get("createdOn"));
+        Expression<Integer> month = cb.function("month", Integer.class, cc_a_root.get("createdOn"));
+        Expression<Integer> day = cb.function("day", Integer.class, cc_a_root.get("createdOn"));
+        Predicate createdOn = cb.and(cb.equal(year, 2019), cb.equal(month, 5), cb.equal(day, 6));
+
+        Subquery<Long> cc_cnt_sq = cc_query.subquery(Long.class);
+        Root<Entitlement> cc_cnt_sq_root = cc_cnt_sq.from(Entitlement.class);
+        cc_cnt_sq.select(cb.count(cc_cnt_sq_root.get("e_id")))
+                .where(cb.equal(cc_cnt_sq_root.get("announcementId"), cc_a_root.get("a_id")));
+
+        cc_query.select(cc_a_root).where(createdOn, cb.equal(cc_cnt_sq, 0));
+
+        System.out.println("RESULT ===>" + entityManager.createQuery(cc_query).getResultList());
+        System.out.println("RESULT2--->" + jpql_query.getResultList());
+
+        assertThat(entityManager.createQuery(cc_query).getResultList())
+                .isEqualTo(jpql_query.getResultList());
+    }
+
+    @Test
     void getBookstoresFromNewYork() {
         TypedQuery<Bookstore> jpql_query = entityManager.createQuery("" +
                         "SELECT bookstore " +
@@ -348,7 +430,7 @@ class TestsWithFullTypeSafe {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Bookstore> cc_query = cb.createQuery(Bookstore.class);
         Root<Bookstore> cc_query_root = cc_query.from(Bookstore.class);
-        
+
         cc_query.select(cc_query_root)
                 .where(cb.equal(cc_query_root.get(Bookstore_.address).get(Address_.city), "New York"));
 
@@ -368,7 +450,7 @@ class TestsWithFullTypeSafe {
     @Test
     void getBookstoresThatHaveTitle() {
         String title = "Harry Potter";
-        
+
         TypedQuery<Bookstore> jpql_query = entityManager.createQuery("" +
                         "SELECT bookstore " +
                         "FROM Bookstore bookstore " +
@@ -393,8 +475,8 @@ class TestsWithFullTypeSafe {
                 .where(cb.exists(cc_subquery));
 
         assertThat(entityManager.createQuery(cc_query)
-                        .setParameter("title", title)
-                        .getResultList())
+                .setParameter("title", title)
+                .getResultList())
                 .containsExactlyInAnyOrderElementsOf(jpql_query.getResultList());
     }
 
@@ -424,19 +506,19 @@ class TestsWithFullTypeSafe {
         CriteriaQuery<Bookstore> cc_query = cb.createQuery(Bookstore.class);
         Root<Bookstore> cc_query_root = cc_query.from(Bookstore.class);
         Join<Bookstore, Book> books = cc_query_root.join(Bookstore_.books);
-        
+
         Subquery<Author> cc_subquery = cc_query.subquery(Author.class);
         Join<Bookstore, Book> cc_subquery_root = cc_subquery.correlate(books); // reference parent's query JOIN expression in subquery 'FROM'
         Join<Book, Author> authors = cc_subquery_root.join(Book_.authors);
         cc_subquery.select(authors)
                 .where(cb.equal(authors.get(Author_.name), cb.parameter(String.class, "author")));
-        
+
         cc_query.select(cc_query_root)
                 .where(cb.exists(cc_subquery));
 
         assertThat(entityManager.createQuery(cc_query)
-                        .setParameter("author", author)
-                        .getResultList())
+                .setParameter("author", author)
+                .getResultList())
                 .containsExactlyInAnyOrderElementsOf(jpql_query.getResultList());
     }
 
@@ -475,9 +557,9 @@ class TestsWithFullTypeSafe {
         Root<Book> cc_query_root = cc_query.from(Book.class);
 
         // BookstoreCountAVG must have exact constructor as multiselect clause
-        cc_query.multiselect(cc_query_root.get(Book_.bookstore), 
-                            cb.count(cc_query_root), 
-                            cb.avg(cc_query_root.get(Book_.price)))
+        cc_query.multiselect(cc_query_root.get(Book_.bookstore),
+                cb.count(cc_query_root),
+                cb.avg(cc_query_root.get(Book_.price)))
                 .groupBy(cc_query_root.get(Book_.bookstore));
 
         assertThat(entityManager.createQuery(cc_query).getResultList())

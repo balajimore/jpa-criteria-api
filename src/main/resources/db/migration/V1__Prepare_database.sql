@@ -38,3 +38,19 @@ create table BOOK_AUTHOR (
     AUTHORS_ID int not null,
     foreign key (AUTHORS_ID) references AUTHOR(ID),
 );
+
+
+create table Announcement (
+    stateRef int auto_increment primary key,
+    a_id int not null,
+    title varchar(50),
+    dividend int not null,
+    createdOn TIMESTAMP WITH TIME ZONE,
+);
+
+create table Entitlement (
+    stateRef int auto_increment primary key,
+    e_id int not null,
+    amount varchar(50),
+    announcementId int not null,
+);
