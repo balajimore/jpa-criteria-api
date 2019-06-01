@@ -374,11 +374,10 @@ class TestsWithFullTypeSafe {
         cc_cnt_sq.select(cb.count(cc_cnt_sq_root.get("e_id")))
                 .where(cb.equal(cc_cnt_sq_root.get("announcementId"), cc_a_root.get("a_id")));
 
-
         cc_query.select(cc_a_root).where(cb.equal(cc_cnt_sq, 0));
 
-        System.out.println("RESULT ===>" + entityManager.createQuery(cc_query).getResultList());
-        System.out.println("RESULT2--->" + jpql_query.getResultList());
+        System.out.println("RESULT SQL--->" + jpql_query.getResultList());
+        System.out.println("RESULT JPQL===>" + entityManager.createQuery(cc_query).getResultList());
 
         assertThat(entityManager.createQuery(cc_query).getResultList())
                 .isEqualTo(jpql_query.getResultList());
@@ -391,8 +390,8 @@ class TestsWithFullTypeSafe {
                                 "SELECT a " +
                                 "FROM Announcement a " +
                                 "WHERE " +
-                                " (YEAR(a.createdOn)=2019) AND (MONTH(a.createdOn)=5) AND (DAY(a.createdOn)=6) AND " +
-                                "0 = (SELECT COUNT(e.e_id) FROM Entitlement e where e.announcementId = a.a_id)",
+                                " (YEAR(a.createdOn)=2019) AND (MONTH(a.createdOn)=6) AND (DAY(a.createdOn)=1) AND " +
+                                "2 = (SELECT COUNT(e.e_id) FROM Entitlement e where e.announcementId = a.a_id)",
                         Announcement.class);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -402,17 +401,17 @@ class TestsWithFullTypeSafe {
         Expression<Integer> year = cb.function("year", Integer.class, cc_a_root.get("createdOn"));
         Expression<Integer> month = cb.function("month", Integer.class, cc_a_root.get("createdOn"));
         Expression<Integer> day = cb.function("day", Integer.class, cc_a_root.get("createdOn"));
-        Predicate createdOn = cb.and(cb.equal(year, 2019), cb.equal(month, 5), cb.equal(day, 6));
+        Predicate createdOn = cb.and(cb.equal(year, 2019), cb.equal(month, 6), cb.equal(day, 1));
 
         Subquery<Long> cc_cnt_sq = cc_query.subquery(Long.class);
         Root<Entitlement> cc_cnt_sq_root = cc_cnt_sq.from(Entitlement.class);
         cc_cnt_sq.select(cb.count(cc_cnt_sq_root.get("e_id")))
                 .where(cb.equal(cc_cnt_sq_root.get("announcementId"), cc_a_root.get("a_id")));
 
-        cc_query.select(cc_a_root).where(createdOn, cb.equal(cc_cnt_sq, 0));
+        cc_query.select(cc_a_root).where(createdOn, cb.equal(cc_cnt_sq, 2));
 
-        System.out.println("RESULT ===>" + entityManager.createQuery(cc_query).getResultList());
-        System.out.println("RESULT2--->" + jpql_query.getResultList());
+        System.out.println("RESULT SQL--->" + jpql_query.getResultList());
+        System.out.println("RESULT JPQL===>" + entityManager.createQuery(cc_query).getResultList());
 
         assertThat(entityManager.createQuery(cc_query).getResultList())
                 .isEqualTo(jpql_query.getResultList());
